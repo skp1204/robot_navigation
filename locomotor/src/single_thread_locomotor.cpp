@@ -64,6 +64,9 @@ public:
     locomotor_.initializeGlobalPlanners(main_ex_);
     locomotor_.initializeLocalCostmap(main_ex_);
     locomotor_.initializeLocalPlanners(main_ex_);
+
+    ros::NodeHandle simple_nh("move_base_simple");
+    goal_sub_ = simple_nh.subscribe<geometry_msgs::PoseStamped>("goal", 1, boost::bind(&SingleThreadLocomotor::goalCB, this, _1));
   }
 
   void setGoal(nav_2d_msgs::Pose2DStamped goal)
@@ -170,6 +173,12 @@ protected:
     as_.failNavigation(result);
   }
 
+
+  void goalCB(const geometry_msgs::PoseStamped::ConstPtr& goal)
+  {
+    setGoal(nav_2d_utils::poseStampedToPose2D(*goal));
+  }
+
   ros::NodeHandle private_nh_;
   // Locomotor Object
   Locomotor locomotor_;
@@ -184,6 +193,8 @@ protected:
 
   // Action Server
   LocomotorActionServer as_;
+
+  ros::Subscriber goal_sub_;
 };
 };  // namespace locomotor
 
